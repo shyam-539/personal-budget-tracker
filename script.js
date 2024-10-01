@@ -7,6 +7,12 @@ function updateExpenses(filteredExpenses = expenses) {
     expenseList.innerHTML = '';
     let totalAmount = 0;
 
+    // Check if there are expenses to display
+    if (filteredExpenses.length === 0) {
+        expenseList.innerHTML = '<tr><td colspan="5" class="text-center">No expenses found</td></tr>';
+    }
+
+    // Render each expense
     filteredExpenses.forEach((expense, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -20,9 +26,37 @@ function updateExpenses(filteredExpenses = expenses) {
         totalAmount += expense.amount;
     });
 
+    // Update total amount
     document.getElementById('total-amount').textContent = totalAmount.toFixed(2);
+
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const index = this.getAttribute('data-index');
+            expenses.splice(index, 1);
+            updateExpenses();
+        });
+    });
+
+    // Update local storage
     localStorage.setItem('expenses', JSON.stringify(expenses));
 }
+
+// Add Expense Form Submit Handler
+document.getElementById('budget-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const description = document.getElementById('description').value;
+    const amount = parseFloat(document.getElementById('amount').value);
+    const category = document.getElementById('category').value;
+    const date = document.getElementById('date').value;
+
+    // Add the new expense
+    expenses.push({ description, category, amount, date });
+    updateExpenses();
+
+    // Clear form inputs
+    e.target.reset();
+});
 
 // Filter Functionality
 function filterExpenses() {
@@ -57,9 +91,6 @@ document.getElementById('apply-filter').addEventListener('click', filterExpenses
 
 // Reset filter when button is clicked
 document.getElementById('reset-filter').addEventListener('click', resetFilter);
-
-// Existing functions to add, update, and delete expenses
-// (including expense submission, deletion, and localStorage handling)
 
 // Load existing expenses on page load
 document.addEventListener('DOMContentLoaded', updateExpenses);
